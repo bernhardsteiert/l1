@@ -30,7 +30,7 @@ Likelihood-ratio test is used to determine the optimal penalization strength res
 The uniqueness of the solution was investigated using the profile likelihood.
 Based on the minimal set of cell-type specific parameters experiments were designed for improving identifiability and to validate the model.
 The approach constitutes a general method to infer an overarching model with a minimum number of individual parameters for the particular models.\\
-\textbf{Availability:} The algorithm is implemented within the freely available, open-source modelling environment Data2Dynamics \cite{Raue2015} based on MATLAB. Source code for all examples is provided online at .\\
+\textbf{Availability:} The algorithm is implemented within the freely available, open-source modelling environment Data2Dynamics \cite{Raue2015} based on MATLAB. Source code for all examples is provided online at ...\\
 \textbf{Contact:} \href{bernhard.steiert@fdm.uni-freiburg.de}{bernhard.steiert@fdm.uni-freiburg.de}\\
 \textbf{Supplementary information:} Supplementary data are available at \textit{Bioinformatics}
 online.}
@@ -38,24 +38,56 @@ online.}
 \maketitle
 
 \section{Introduction}
+The progress in the development of experimental assays like the establishment of high-throughput measurement techniques raised new demands on statistical methodology. 
+Many scientific questions in the field of Bioinformatics and Systems Biology nowadays requires large models with hundreds or even thousands of parameters or variables. 
+Therefore, a major issue in many applications is feature selection, i.e. determination of informative parameters or variables which are required to explain experimental observations, for identification of differential expression and/or for making reliable predictions. 
 
-Tibshirani: Lasso\\
-Schmidt\\
-Regression\\
-Feature selection\\
-Compressed sensing\\
-...
+In many cases, feature selection is equivalent to model discrimination \citep{Box67} since a set of features corresponds to a specific model with corresponding set of parameters. 
+In \emph{multiple linear regression}, as an example, feature selection corresponds to choosing appropriate prediction variables used to fit an experimentally observed response variable. 
+The traditional approach for choosing a suitable level of detail and the respective optimal set of features is iteratively testing many models \citep{Thompson1978}, 
+i.e.~different combinations of features e.g.~by \emph{forward-} or \emph{backward selection} or combinations thereof \citep{Hocking1967, Efroymson60}. 
+However, if the number of potential predictors is are large, the number of possible combinations increase dramatically rendering such iterative procedures as infeasible. 
 
-%Text Text Text Text Text Text  Text Text Text Text Text Text Text
-%Text Text  Text Text Text Text Text Text. Figure~\ref{fig:01}
-%shows that the above method  Text Text Text Text  Text Text Text
-%Text Text Text  Text Text.  \citep{Bag01} wants to know about
-%{\ldots}{\ldots} text follows.
-%\begin{equation}
-%\sum \text{\it x}+ \text{\it y} =\text{\it Z}\label{eq:01}\vspace*{-10pt}
-%\end{equation}
+Regularization techniques have been suggested as an alternative approach for selecting features and estimating the parameters in a single step. 
+The idea is to estimate the parameters by optimization of an appropriate objective function, e.g.~by maximizing the \emph{likelihood}. 
+If then in addition the impact of individual features is penalized, the optimal solution becomes sparse and the level of sparsity can be controlled by the strength of penalization. 
+It has been shown that such penalties are equivalent to utilization of prior knowledge supplemental to the information provided by the data. 
 
-%\enlargethispage{12pt}
+The additional information provided by penalties reduce the variance of the estimated parameters but at the same time introduce a bias. This effect has been termed as \emph{shrinkage}. 
+If the regularizing penalties are chosen appropriately, e.g. if the \emph{L0}- or \emph{L1-norm} are applied, a second effect occurs which can be utilized for feature selection. 
+Because the L0- and L1-norm penalize parameters unequal to zero, only parameters remain in the model which are mandatory for explaining the data. 
+Since the penalized likelihood is discontinuous for L0 regularization, L1-penalties are usually preferred.
+
+The concept of using the L1-norm for data analysis and calibrating a model has been applied in several fields like for deconvolution of wavelets \citep{Taylor1979}, 
+reconstruction of sparse spike trains of Fourir components \citep{Levy1981}, recovering acoustic impedance of seismograms \citep{Oldenburg1983} 
+as well as for \emph{compressed sensing} \citep{Candes2008,Cheng2015} and clinical prediction models \citep{Hothorn2006}. 
+Additionally, it has been used to establish statistical methods which are robust against violation of distributional assumptions about measurement errors \citep{Claerbout73, Barrodale1973}. Moreover, L1 penalties have been applied to incorporate \emph{Laplacian priors} \citep{xx}. 
+%
+Despite this variety of applications, the usability for feature selection and a comprehensive statistical interpretation was not established until introduction of the 
+\emph{LASSO (least absolute shrinkage and selection operator)}. 
+This prominent approach for linear models was published in \cite{Tibshirani94} when the first cheap high-throughput techniques were available and the necessity of new approaches for analyzing high-throughput data became inevitable.
+
+The standard LASSO has been generalized or adapted for other applications in several directions. 
+Feature selection via LASSO was discussed for the regression case in more detail in \cite{tibshirani96}, for Cox-regression in \cite{Tibshirani1997}, and for clustering e.g.~in \cite{Witten2010}
+The \emph{elastic net} has been introduced as a combination of L1 and L2 regularization \citep{Zou05}. 
+The so-called  \emph{group-LASSO} has been established to select between predefined groups of features \citep{Yuan2006}, \emph{fused LASSO} accounts for additional constraints of pairs of parameters \citep{Tibshirani2005}, and  \emph{generalized LASSO} has been developed to regularize arbitrary prespecified parameter linear combinations \citep{Tibshirani2011}.
+
+
+Mechanistic  \emph{ordinary differential equation (ODE)} models are applied in Systems Biology for describing and understanding cellular signal transduction pathways or gene regulatory networks. 
+For such ODE models, the feature selection issue occurs, if several cell types are considered. 
+Since each cell type has different concentrations of intracellular compounds and diverse structure, each parameter of a reaction network could potentially be different. 
+We suggest L1-regularization in this setting to predict parameters which differ between cell-types.
+The components of mechanistic models have counterparts in the biological pathway of interest. 
+Therefore, the models usually contain a large number of state variables representing molecular compounds and many parameters for the individual biochemical interactions. 
+Therefore, the models are large and the effect of the parameters on the dynamics is typically strongly nonlinear. 
+For estimating parameters in such ODE models, only a small subset of optimization routines in combination with appropriate strategies for calculating derivatives of the objective function, dealing with non-identifiability, handling of local minima etc. are applicable \citep{Raue2013}. 
+We therefore augment an existing and well-tested implementation for parameter estimation for such systems \citep{Raue2015} to perform feature selection based on L1-regularization. 
+For this purpose, trust-region optimization \citep{Coleman96} was combined with a subgradient strategy as presented in \citep{Schmidt09} to enable efficient optimization in the presence of L1-penalties. 
+
+Since shrinkage, i.e. decreasing the variance by introducing a bias is not intended for mechanistic models, we only select the features, i.e. the cell-type specific parameters, by L1-regularization and then use these additional features to estimate the magnitude of the parameters in an unbiased manner. 
+A suitable strategy is presented for choosing the regularization strength in this setting. 
+The applicability is demonstrated using a benchmark model from the \emph{DREAM (Dialogue for Reverse Engineering Assessment and Methods)} parameter estimation challenge \citep{Steiert12}. 
+The presented approach constitutes a suitable methodology for predicting cell-type specific parameters as well as for identification of cell-type specific sensitivities for drugs which are prominent issues in cancer research.
 
 \section{Problem statement}
 
@@ -75,7 +107,7 @@ p = [p_0, p_x, p_u, p_y, \sigma] \:.\label{eq:par}
 \end{equation}
 Therefore, the expressions (Eq~\ref{eq:ode}-\ref{eq:par}) fully specify $\mathcal M$.
 To ensure positive values and improve numerics, all parameters are log-transformed.\\
-Now given two cell types with a common ODE structure (Eq.~\ref{eq:ode}) but differing in their parameters $p$, i.e. $p_1 \neq p_2$.
+Now given two cell types whose data can be fitted by a common ODE structure (Eq.~\ref{eq:ode}) but the results differ in their parameters $p$, i.e. $p_1 \neq p_2$.
 Discovering which of the components in $p_1$ and $p_2$ are cell type-specific is the main topic of this manuscript.
 
 \begin{figure}[!tpb]%figure1
@@ -417,49 +449,14 @@ text text text\vspace*{-12pt}
 
 This work has been supported by the... Text Text  Text Text.\vspace*{-12pt}
 
-%\bibliographystyle{natbib}
+\bibliographystyle{natbib}
 %\bibliographystyle{achemnat}
 %\bibliographystyle{plainnat}
 %\bibliographystyle{abbrv}
-%\bibliographystyle{bioinformatics}
-%
-%\bibliographystyle{plain}
-%
-%\bibliography{Document}
+% \bibliographystyle{bioinformatics}
 
+% \bibliographystyle{plain}
 
-\begin{thebibliography}{}
+\bibliography{document}
 
-%\bibitem[Bofelli {\it et~al}., 2000]{Boffelli03}
-%Bofelli,F., Name2, Name3 (2003) Article title, {\it Journal Name}, {\bf 199}, 133-154.
-%
-%\bibitem[Bag {\it et~al}., 2001]{Bag01}
-%Bag,M., Name2, Name3 (2001) Article title, {\it Journal Name}, {\bf 99}, 33-54.
-%
-%\bibitem[Yoo \textit{et~al}., 2003]{Yoo03}
-%Yoo,M.S. \textit{et~al}. (2003) Oxidative stress regulated genes
-%in nigral dopaminergic neurnol cell: correlation with the known
-%pathology in Parkinson's disease. \textit{Brain Res. Mol. Brain
-%Res.}, \textbf{110}(Suppl. 1), 76--84.
-%
-%\bibitem[Lehmann, 1986]{Leh86}
-%Lehmann,E.L. (1986) Chapter title. \textit{Book Title}. Vol.~1, 2nd edn. Springer-Verlag, New York.
-%
-%\bibitem[Crenshaw and Jones, 2003]{Cre03}
-%Crenshaw, B.,III, and Jones, W.B.,Jr (2003) The future of clinical
-%cancer management: one tumor, one chip. \textit{Bioinformatics},
-%doi:10.1093/bioinformatics/btn000.
-%
-%\bibitem[Auhtor \textit{et~al}. (2000)]{Aut00}
-%Auhtor,A.B. \textit{et~al}. (2000) Chapter title. In Smith, A.C.
-%(ed.), \textit{Book Title}, 2nd edn. Publisher, Location, Vol. 1, pp.
-%???--???.
-%
-%\bibitem[Bardet, 1920]{Bar20}
-%Bardet, G. (1920) Sur un syndrome d'obesite infantile avec
-%polydactylie et retinite pigmentaire (contribution a l'etude des
-%formes cliniques de l'obesite hypophysaire). PhD Thesis, name of
-%institution, Paris, France.
-
-\end{thebibliography}
 \end{document}
