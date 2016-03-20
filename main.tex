@@ -19,7 +19,7 @@ $^{\text{\sf 2}}$BIOSS Centre for Biological Signalling Studies, University of F
 \history{Received on XXXXX; revised on XXXXX; accepted on XXXXX}
 
 \editor{Associate Editor: XXXXXXX}
-
+% This abstract is more or less a placeholder and needs to be rewritten.
 \abstract{\textbf{Motivation:}
 A major goal in systems biology is to reveal potential drug targets for cancer therapy.
 Signaling pathways triggering cell-fate decisions are often altered in cancer resulting in uncontrolled proliferation and tumor growth.
@@ -46,7 +46,7 @@ In many cases, feature selection is equivalent to model discrimination \citep{Bo
 In \emph{multiple linear regression}, as an example, feature selection corresponds to choosing appropriate prediction variables used to fit an experimentally observed response variable. 
 The traditional approach for choosing a suitable level of detail and the respective optimal set of features is iteratively testing many models \citep{Thompson1978}, 
 i.e.~different combinations of features e.g.~by \emph{forward-} or \emph{backward selection} or combinations thereof \citep{Hocking1967, Efroymson60}. 
-However, if the number of potential predictors is are large, the number of possible combinations increase dramatically rendering such iterative procedures as infeasible. 
+However, if the number of potential predictors is are large, the number of possible combinations increase dramatically as shown in Figure~1\vphantom{\ref{fig:01}}, rendering such iterative procedures as infeasible. 
 
 Regularization techniques have been suggested as an alternative approach for selecting features and estimating the parameters in a single step. 
 The idea is to estimate the parameters by optimization of an appropriate objective function, e.g.~by maximizing the \emph{likelihood}. 
@@ -222,16 +222,28 @@ The \emph{PL} shape is then a clear indicator for compensation.
 \end{figure}
 
 \subsection{Regularization strength $\lambda$}
-Similar to \emph{PL}: Increase $\lambda$ until mismatch between model and data is large enough to reject simplification.\\
-Several methods: Cross-Val, LRT, AIC, BIC \\
-At the end, a good method should optimize specificity and sensitivity. Thus, the result should as close as possible to the upper-left corner of the ROC curve.
+For generating model candidates, $\lambda$ is increased and the likelihood is re-optimized until mismatch between model and data is too large to reject the associated simplification.
+This strategy is similar to the calculation of \emph{PL}, where a parameter of interest is fixed and the remaining parameters are re-estimated.
+In both cases, likelihood-ratio statistics are employed to discover admissible regions.
+For $L_1$ based feature selection, cross validation is often used to choose the final value for the regularization weight $\lambda$.
+However, in nonlinear modeling, leaving data out could produce non-identifiablilites and the effect on the prediction error can be ambiguous.
+Therefore, we decided to use an information theory based test criterion.
+The most prominent methods are the likelihood ratio test (LRT), the Akaike information criterion (AIC), and the Bayesian information criterion (BIC).
+The criteria are depicted by the vertical lines in Figure~4\vphantom{\ref{fig:04}} for an exemplary regularization path.
+In certain settings these are equivalent: AIC resembles LRT for $\alpha = 15.6\%$.
+With growing model size, $\alpha$ should be adjusted.
+As this is not possible, we favor LRT over AIC.
+BIC takes model size into account and is therefore equivalent to LRT with adjusted $\alpha$.
+Because the selection criteria BIC and LRT hence comparable, we only use LRT in the following without loss of generality.\\
+At the end, a good method should optimize specificity and sensitivity.
+Thus, the result should as close as possible to the upper-left corner of the ROC curve.
 
 \begin{figure}[!tpb]%figure1
 \fboxsep=0pt\colorbox{gray}{\begin{minipage}[t]{235pt} \vbox to 100pt{\vfill\hbox to
 235pt{\hfill\fontsize{24pt}{24pt}\selectfont FPO\hfill}\vfill}
 \end{minipage}}
 %\centerline{\includegraphics{fig01.eps}}
-\caption{Regularization path. Show different selection criteria (LRT, AIC, BIC).}\label{fig:01}
+\caption{Regularization path. Show different selection criteria (LRT, AIC, BIC).}\label{fig:04}
 \end{figure}
 
 %Equation~(\ref{eq:01}) Text Text Text Text Text Text  Text Text
@@ -244,12 +256,18 @@ At the end, a good method should optimize specificity and sensitivity. Thus, the
 
 \begin{methods}
 \section{Approach}
+% This section needs improvement. What are the exact steps to be performed for L1 analysis?
 Given an overarching model that is able to describe two cell types with parameter vectors $p_1$ and $p_2$ for cell types 1 and 2, respectively.
 Eq.~\ref{eq:likreg} is used to $L_1$ penalize the fold-change parameters $r$.
 Then, $\lambda$ is scanned and the number of cell type specific parameters is observed.
-For chosing the optimal $\lambda$, the un-regularized Eq.~\ref{eq:lik} is optimized, under the constraint that parameters with $r_i = 0$ are shared between both cell types.\\
-Uniqueness, Validation design (= find dynamics with a small prediction CI, which are different for ct1 and ct2)\\ \\
-%
+For chosing the optimal $\lambda$, the un-regularized Eq.~\ref{eq:lik} is optimized, under the constraint that parameters with $r_i = 0$ are shared between both cell types.
+The full model with all parameters specific for each cell type is then compared by the likelihood ratio test to each of the models that were selected using $L_1$ regularization.
+Finally, the most parsimoneous model is defined as the smallest model that cannot be rejected by the likelihood ratio test.\\
+Exemplary, we investigate uniqueness by \emph{PL}.
+For giving a statistical assessment of the method it is unfeasible to perform this supervised uniqueness analysis for each iteration.
+However when applied in practice results can be further improved by this analysis.
+Further, plotting unobserved components for both cell types can enables validation design by discovering dynamics with a small prediction CI, which are different between the cell types.
+
 %Text Text Text Text Text Text  Text Text Text Text Text Text Text
 %Text Text Text Text Text Text Text Text.
 %Figure~2\vphantom{\ref{fig:02}} shows that the above method  Text
@@ -328,18 +346,18 @@ Uniqueness, Validation design (= find dynamics with a small prediction CI, which
 %\citealp{Boffelli03} might want to know about  text text text text\vspace{10pt}
 
 \section{Application}
-DREAM6 Model 1\\
-Mimics gene-regulatory network\\
-Used to evaluate performance of experimental design strategies to optimize parameters and predictions\\ \\
-Description model:\\
-6 state mRNA, 6 states Protein\\
-Initials fixed\\
-29 parameters\\
-1 p\_degradation\_rate\\
-6 pro\_strength\\
-6 rbs\_strength\\
-8 $K_d$\\
-8 Hill\\
+In the following, we use the first model of the \emph{DREAM6 (Dialogue for Reverse Engineering Assessment and Methods)} challenge as benchmark for our approach.
+The in-silico model mimics a gene-regulatory network and is based on realistic assumptions.
+It was used in 2011 to evaluate the performance of experimental design strategies to optimize parameters and predictions.
+The model incorporates transcription and translation dynamics of 6 genes.
+Therefore, the dynamic variables represent 6 mRNAs, as well as the 6 associated proteins with known intial concentrations.
+Positive and negative regulation between genes is possible.
+Taken together, the model consits of 29 parameters.
+13 are associated with generation and degradation of molecules:
+1 protein degradation rate which is shared among all proteins; 
+6 ribosomal strengths determining the production rate of mRNAs;
+6 protein production strengths which define how strong mRNA presence induces protein synthesis;
+The remaining 16 parameters define the interaction of genes by Hill kinetics, thus 8 $K_D$ values and 8 Hill coefficients are assumed.\\
 Use gold-standard as cell type 1\\
 All parameters identifiable (except 1 Hill only lb)\\
 1/3 of parameters is assumed to be cell type-specific / were changed in cell type 2\\
