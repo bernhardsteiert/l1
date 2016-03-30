@@ -109,10 +109,12 @@ Therefore, the expressions (Eq~\ref{eq:ode}-\ref{eq:par}) fully specify $\mathca
 To ensure positive values and improve numerics, all parameters are log-transformed.\\
 Now given two cell types whose data can be fitted by a common ODE structure (Eq.~\ref{eq:ode}) but the results differ in their parameters $p$, i.e. $p_1 \neq p_2$.
 Discovering which of the components in $p_1$ and $p_2$ are cell type-specific is the main topic of this manuscript.
+A na\"{\i}ve approach would be to simply test all possibilities for cell type-specific parameters.
+However, as depicted in Figure~1\vphantom{\ref{fig:01}} this leads to an exponential growth in number of model candidates.
 
 \begin{figure}[!tpb]%figure1
-\centerline{\includegraphics[width=235pt]{Figures/tree.jpg}}
-\caption{Naive approach.}\label{fig:01}
+\centerline{\includegraphics[width=.4\textwidth]{Figures/tree.eps}}
+\caption{Na\"{\i}ve approach. Starting from the left, a each parameter $r_i$ has to be chosen either cell type-independent ($r_i=0$) or -specific ($r_i\neq 0$). Hence, the number of model candidates with grows exponentially with the number of parameters.}\label{fig:01}
 \end{figure}
 
 \subsection{Unbiased parameter estimation}
@@ -125,7 +127,7 @@ is optimized, resulting in the maximum likelihood estimate
 \begin{equation}
 \hat p = \text{arg}\min \left[ -2\log \mathcal L(p) \right] \:.
 \end{equation}
-Multi-start deterministic local optimization is applied to ensure that $\hat p$ is in fact the global optimum.
+Multi-start deterministic local optimization is often applied to ensure that $\hat p$ is in fact the global optimum.
 
 \subsection{Regularization}
 Regularization is often applied to incorporate prior knowledge or to improve numerics of parameter estimation.
@@ -150,7 +152,7 @@ Due to local optima, the MLE (Eq.~\ref{eq:lik}) is obtained for individual cell 
 
 \begin{figure}[!tpb]%figure1
 \centerline{\includegraphics[width=235pt]{Figures/l1_cartoon_priorstrength.pdf}}
-\caption{Exemplary log-likelihood. Regularization and constrained likelihood for different regularization weight $\lambda$.}\label{fig:01}
+\caption{Exemplary log-likelihood. Regularization and constrained likelihood for different regularization weight $\lambda$.}\label{fig:02}
 \end{figure}
 
 \subsection{Regularized parameter estimation}
@@ -174,23 +176,44 @@ To implement optimization of the posterior (Eq.~\ref{eq:likreg}),
 is appended to the residuals vector.
 The associated sensitivites are given by
 \begin{equation}
-	\text{sres}_i = \frac{\text{sgn}(r_i)}{\frac{2}{\lambda}\sqrt{\frac{|r_i|}{1/\lambda}}} \:.\label{eq:sres}
+	\text{sres}_{ii} = \frac{\text{sgn}(r_i)}{\frac{2}{\lambda}\sqrt{\frac{|r_i|}{1/\lambda}}} \:.\label{eq:sres}
 \end{equation}
-Therefore, the gradient
+Therefore, the gradient components
 \begin{equation}
-	g = 2 \: \text{res}_i \cdot \text{sres}_i = \pm \lambda
+	g_i = 2 \: \text{res}_i \cdot \text{sres}_{ii} = \pm \lambda
 \end{equation}
 matches the theoretical value.
-For $\lambda = 0$, Eq.~\ref{eq:sres} is not defined.
-The convergence criterion is given by
+For $r_i = 0$, Eq.~\ref{eq:sres} is not defined.
+In this case, the convergence criterion
 \begin{equation}
 	\begin{cases}
 	\nabla_i \chi^2(\hat r_i) + \lambda \text{ sign}(\hat r_i) = 0, \:\:& |\hat r_i| > 0\\
 	|\nabla_i \chi^2(\hat r_i)| \le \lambda, \:\:&\hat r_i = 0 \:.
 	\end{cases}
+	\label{eq:convcrit}
 \end{equation}
-To incorporate this criterion into optimization, $\text{sres}_i$ is set to $0$ if $|\nabla_i \chi^2(\hat r_i)| \le \lambda$.\\
-% sub-gradient
+is implemented by setting
+\begin{equation}
+	\begin{cases}
+	\text{sres}_{ii}=0&|\nabla_i \chi^2(r_i)| > \lambda\\
+	\text{sres}_{ij}=0\:\:\forall j, \:\:&|\nabla_i \chi^2(r_i)| \le \lambda \:.
+	\end{cases}
+	\label{eq:sresset}
+\end{equation}
+The rationale behind Eq.~\ref{eq:convcrit} is that the $L_1$ gradient either compensates the data gradient (first line), or that the $L_1$ gradient is stronger than the data gradient and keeps the estimate at its center $\hat r_i=0$ (second line).
+During optimization, for a candidate $r_i=0$ this parameter-wise convergence criterion is checked at each optimization step.
+While it is true, the derivative of each residual $j$ with respect to $r_i$ is set to zero, i.e. $\text{sres}_{ij}=0\:\:\forall j$.
+If along optimization, the convergence criterion is not met anymore, only the ith $L_1$ contribution to the gradient is set to zero.
+This enables $r_i$ that were zero to be released during optimization if there is strong evidence for it stemming from the data.
+
+The $L_1$ metric has a discontinous derivative at zero.
+In other words, the derivative changes for the optimizer unexpectedly as the sign of an $L_1$ regularized changes, also known as change of an orthant.
+Hence, proposed optimization steps that change the orthant have to be avoided.
+There are several methods that cope with this problem.
+They have in common that they divide a proposed step into two:
+first they step towards zero, then they move on.
+Their major difference is the strategy how to step towards zero.
+To keep the original behavior of trust-region based methods, we implemented the truncation of an optimization step such that the orthant is maintained.
 
 \subsection{Profile likelihood}
 The \emph{profile likelihood (PL)} constitutes a method to assess confidence intervals of parameters or predictions.
@@ -265,7 +288,10 @@ The full model with all parameters specific for each cell type is then compared 
 Finally, the most parsimoneous model is defined as the smallest model that cannot be rejected by the likelihood ratio test.\\
 Exemplary, we investigate uniqueness by \emph{PL}.
 For giving a statistical assessment of the method it is unfeasible to perform this supervised uniqueness analysis for each iteration.
-However when applied in practice results can be further improved by this analysis.
+However when applied in practice results can be further improved by this manual analysis.
+To mimic the manual inspection of the results, we implemented a heuristic that tests each $L_1$ parameter against zero from their order of deviation from zero.
+If the likelihood did not increase by more than 1, the correction was accepted.
+We show exemplarily for the application how the heuristic performs against a supervised manual inspection.
 Further, plotting unobserved components for both cell types can enables validation design by discovering dynamics with a small prediction CI, which are different between the cell types.
 
 %Text Text Text Text Text Text  Text Text Text Text Text Text Text
@@ -329,11 +355,6 @@ Further, plotting unobserved components for both cell types can enables validati
 
 \end{methods}
 
-\begin{figure}[!tpb]%figure1
-\centerline{\includegraphics[width=235pt]{Figures/ROC.pdf}}
-\caption{ROC curve displaying the performance of the implementation on DREAM6 M1. No experimental design was performed. $N = 150$. Black line is average ROC curve. Shading is standard deviation. Blue circles denote selected model for all iterations. Because the dots appear on average near the maximum of sensitivity and specificity (upper left corner), the selection criterion is appropriate.}\label{fig:01}
-\end{figure}
-
 %\begin{figure}[!tpb]%figure2
 %%\centerline{\includegraphics{fig02.eps}}
 %\caption{Caption, caption.}\label{fig:02}
@@ -346,6 +367,7 @@ Further, plotting unobserved components for both cell types can enables validati
 %\citealp{Boffelli03} might want to know about  text text text text\vspace{10pt}
 
 \section{Application}
+\subsection{Model description}
 In the following, we use the first model of the \emph{DREAM6 (Dialogue for Reverse Engineering Assessment and Methods)} challenge as benchmark for our approach.
 The in-silico model mimics a gene-regulatory network and is based on realistic assumptions.
 It was used in 2011 to evaluate the performance of experimental design strategies to optimize parameters and predictions.
@@ -357,33 +379,78 @@ Taken together, the model consits of 29 parameters.
 1 protein degradation rate which is shared among all proteins; 
 6 ribosomal strengths determining the production rate of mRNAs;
 6 protein production strengths which define how strong mRNA presence induces protein synthesis;
-The remaining 16 parameters define the interaction of genes by Hill kinetics, thus 8 $K_D$ values and 8 Hill coefficients are assumed.\\
-Use gold-standard as cell type 1\\
-All parameters identifiable (except 1 Hill only lb)\\
-1/3 of parameters is assumed to be cell type-specific / were changed in cell type 2\\
-Randomly simulated fold-changes of [2 5 10] for non-Hill and inverse\\
-Hill fold change of $1/2$ and and $1/5$\\
-% Hill such that they stay inside [1 4]\\
-Taken together, the number of possible models is $2^{29}>5\cdot10^8$.\\ \\
-Description data:\\
-mRNA measurements with 21 data-points, all observed\\
-Protein measurements with 41 data-points, 2 observed\\
-Observation function is identity\\
-Error model is absolute + relative with given parameters\\
-Wildtype all observed\\
-3 possible perturbations per node: Knock-out, knock-down, over-expression\\
-In total, budget was sufficient for around 9 additional data-sets\\
-Strategy: Choose random (50\%) if perturbation is selected\\
-Choose random if mRNA (1/3) or proteins (2/3) are observed, if so choose random 2 proteins\\ \\
-Approach:\\
-Use $L_1$ and scan along $\lambda$ for variable selection\\
-Use unpenalized solution for selection of $\lambda$\\
-Iterate 1000 times\\ \\
-Results:\\
-ROC curve\\
-Performance for different parameter types: Table~1\vphantom{\ref{Tab:01}}\\
+The remaining 16 parameters define the interaction of genes by Hill kinetics, thus 8 $K_D$ values and 8 Hill coefficients are assumed.
+
+DREAM6 M1 was simulated with gold-standard parameters that were made publicly available after completion of the challenge.
+We now use this gold-standard as cell type 1.
+When complete data is provided, i.e. all observables measured at all possible experimental condidtions, all parameters are identifiable, except for one Hill coefficient which is only restricted to lower values.
+Thus, we conclude that determining parameter differences between cell types is possible in principle.
+Next, we assumed 1/3 of all parameters to be cell type-specific.
+We therefore randomly simulated fold-changes of $[2~5~10]$ for non-Hill parameters in both directions.
+For Hill coefficients, fold changes of $1/2$ and $1/4$ were assumed, under the constraint that the modified values stay inside the interval $[1~4]$.
+This assumption for the range is biologically reasonable as the number of binding sites on a molecule is thereby considered.
+Taken together, the number of possible models is $2^{29}>5\cdot10^8$.
+
+In the original DREAM6 challenge, there were basically two observation types available:
+(1) mRNA measurements for all mRNAs with 21 data-points each, or (2) protein measurements for 2 proteins which had to be specified, each with 41 data-points.
+The observation function was the identity, i.e. the molecular compounds were observed directly without scaling or offset parameters.
+The error model was consisted of an absolute term as well as a relative term with given contributions.
+% If a trajectory was near zero, negative data points may occur which were then set to zero to avoid negative concentrations.
+In addition to wildtype data, there was the option of performing 3 possible perturbations per each node $i$ out of 6 nodes:
+\begin{enumerate}
+\item knock-out ($\text{mRNA\_pro}_i=\text{Prot\_pro}_i=0$)
+\item knock-down ($\text{mRNA\_deg}_i\rightarrow 5\cdot \text{mRNA\_deg}_i$)
+\item over-expression ($\text{mRNA\_pro}_i \rightarrow 2\cdot \text{mRNA\_pro}_i$)
+\end{enumerate}
+In total, this results in 18 possible experimental conditions.
+To have a reference for perturbations we decided during the original challenge to purchase all wildtype data, i.e. mRNA and protein data for all observables.
+After acquiring wildtype data the remaining budget was sufficient for around 9 additional data-sets, which had to be selected from $331$ possibilities.
+To allow some variability in the number of experiments, we randomly (50\%) selected for each of the 18 conditions whether the conditions was included in the observation.
+To mimic the partial observation which was one task of the DREAM6 challenge, we chose random whether mRNA (1/3) or proteins (2/3) were observed.
+Given the latter, 2 out of 6 proteins were randomly selected.
+We chose the same experimental conditions and observables for both cell types.
+
+After implementing the fold-changes between cell types, as well as perturbations and observerations we used a $L_1$ regularization for all fold-change parameters and scanned along $\lambda$ for variable selection.
+For selection of $\lambda$ we used the unpenalized solution.
+Thus, we could ensure an unbiased estimate of the fold-change parameters.
+
+\subsection{Performance assessment}
+The procedure of selecting fold-changes and observations was iterated $N=500$ times, yielding a random sample of $2^{29} \cdot 331 > 10^{11}$ possibilities.
+The performance is summarizes in Figure~5\vphantom{\ref{fig:05}}.
+The black line depicts the average ROC curve, the shading gives the standard deviation over all $N=500$ iterations.
+The blue dots show the selected parsimonious model selected by the likelihood-ratio test.
+Usually, for a given ROC curve the selection criterion is chosen to maximize both sensitivity and specificity simulateously, which is the point most up-left on the ROC curve.
+Because the blue dots appear centered around this `kink', we consider our selection criterion appropriate.
+
+We further evaluated the performance of our $L_1$ fold-change detection routine for different parameter types.
+The results are summarizes in Table~1\vphantom{\ref{Tab:01}}.
+The protein degradation rate which is shared among all proteins is detected in 100\% as difference when there was a difference simulated.
+On the other hand, this parameter also had the highest false positive rate with round 44\%.
+A possible explanation is given by the fact that our method is data driven and hence differences are more likely to be detected in points of the network with more data available.
+This is the case for the protein degradation rate because it influences all proteins in the network.
+The individual protein production and ribosomal strengths have a decent false positive rate between 20\% and 30\% and a true positive rate of over 80\%.
+In contrast, the Hill regulation parameters ($K_D$ and Hill coefficient) are detected less frequently as difference.
+Probably, this is due to identifiability issues as those parameters were already the most difficult ones to estimate in the original DREAM6 challenge.
+The underlying reason is that the concentration range around $K_D$ has to be sampled for a reliable estimation which cannot be ensured without proper experimental design.
+
 % Performance for different fold-changes\\ % Wie bewertet man das am besten? Braeuchte man evtl. Unsicherheitsabschaetzungen ...
 Performance for different ratio of protein vs mRNA measurement
+
+\begin{figure}[!tpb]%figure1
+\centerline{\includegraphics[width=235pt]{Figures/ROC.pdf}}
+\caption{ROC curve displaying the performance of the implementation on DREAM6 M1. No experimental design was performed. $N = 500$. Black line is average ROC curve. Shading is standard deviation. Blue circles denote selected model for all iterations. Because the dots appear on average near the maximum of sensitivity and specificity (upper left corner), the selection criterion is appropriate.}\label{fig:05}
+\end{figure}
+
+\subsection{Manual inspection}
+In the following, we select one representative iteration out of the $N=500$ given by a minimal deviation of its ROC curve to the average ROC curve.
+For the automatic model selection shown in the previous section, $\lambda$ was scanned around the selected value.
+Now, we use a higher grid density for $\lambda$ to visualize the regularization path in Figure X.
+Next, we calculate \emph{PL} for each regularized parameter to check for compensating effects.
+This facilitates the removal of YY additional parameters.
+Finally, we checked by calculating \emph{PL} of the unregularized fold-change parameters whether the results are not compatible with zero.
+This was the case.
+In comparison to the automatically detected parameter differences, the result of the manual inspection decreased the FPR from XX\% to YY\% and increased the TPR from XX\% to YY\%.
+We therefore advise manual inspection in a real world application to maximize the performance of the method.
 
 \begin{table}[!t]
 \processtable{Performance of algorithm on DREAM6 M1\label{Tab:01}} {\begin{tabular}{@{}llll@{}}\toprule Parameter class &
@@ -394,7 +461,7 @@ Ribosomal strength & 282 & 0.2071 & 0.8191\\
 $K_D$ value & 418 & 0.1560 & 0.6842\\
 Hill coefficient & 396 & 0.2164 & 0.6843\\\hline
 All & 1462 & 0.2209 & 0.7544\\\botrule
-\end{tabular}}{Protein degradation rate is shared among all and hence often diagnosed as difference. Strengths are well-balanced for FPR and TPR. $K_D$ and Hill coefficients are difficult to detect because concentration range around $K_D$ has to be covered to see effect on dynamics. 150 iterations were computed. Calculations took xx.xx min on an Intel Xeon E5-1620 3.60Ghz workstation.}
+\end{tabular}}{Protein degradation rate is shared among all and hence often diagnosed as difference. Strengths are well-balanced for FPR and TPR. $K_D$ and Hill coefficients are difficult to detect because concentration range around $K_D$ has to be covered to see effect on dynamics. 500 iterations were computed. Each iteration ($L_1$ regularized scan; unregularized fits) took 28.8 min on average on an Intel Xeon E5-1620 3.60Ghz desktop computer.}
 \end{table}
 
 
@@ -458,7 +525,7 @@ Lack of observation function\\
 No differences in initials\\
 Non-identifiability may decrease TPR\\
 Hills hard to detect (range is important)\\
-Experimental design principles were not applied\\
+Experimental design principles were not applied, which were the task in the original DREAM6 challenge. Therefore, one cannot expect perfect detection of cell type specific parameters due to identifiability issues.\\
 Method data driven
 
 %(Table~\ref{Tab:01}) Text Text Text Text Text Text  Text Text Text

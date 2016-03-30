@@ -1,0 +1,84 @@
+\documentclass[landscape]{bioinfo}
+\usepackage{grffile}
+
+% \usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+
+\usepackage{amsmath, amsthm, amssymb, amstext}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\pgfplotsset{plot coordinates/math parser=false}
+
+
+% \setlength{\textwidth}{29.7 cm}
+%\setlength{\textheight}{21 cm}
+% \setlength{\leftmargin}{-3 cm}
+% \setlength{\topmargin}{2 cm}
+%\setlength{\voffset}{-2 cm}
+% \setlength{\hoffset}{-10cm}
+
+\begin{document}
+\pagestyle{empty}
+
+
+% Define block styles
+\tikzstyle{point} = [circle, draw, fill=white, 
+    text width=0em, node distance=1.2cm, inner sep=0pt,
+    minimum height=4em,minimum width=4em]
+\tikzstyle{line} = [draw, -latex', sloped]
+    
+\begin{tikzpicture}
+
+	\node [point] (1) {};
+	\node [point, below of=1] (2) {};
+	\node [point, below of=2] (3) {};
+	\node [point, below of=3] (4) {};
+	\node [point, below of=4] (5) {};
+	\node [point, below of=5] (6) {};
+	\node [point, below of=6] (7) {};
+	\node [point, below of=7] (8) {};
+
+	\node (12) at ($(1)!0.5!(2)$) {};
+	\node (34) at ($(3)!0.5!(4)$) {};
+	\node (56) at ($(5)!0.5!(6)$) {};
+	\node (78) at ($(7)!0.5!(8)$) {};
+
+	\node [point, left=2cm of 12] (11) {};
+	\node [point, left=2cm of 34] (22) {};
+	\node [point, left=2cm of 56] (33) {};
+	\node [point, left=2cm of 78] (44) {};
+
+	\node (1122) at ($(11)!0.5!(22)$) {};
+	\node (3344) at ($(33)!0.5!(44)$) {};
+
+	\node [point, left=2cm of 1122] (1111) {};
+	\node [point, left=2cm of 3344] (2222) {};
+
+	\node (mid) at ($(1111)!0.5!(2222)$) {};
+	\node [point, left=2cm of mid] (start) {};
+
+	\path [line] (11) -- node [yshift=1em, pos=.5]{$r_3=0$}(1);
+	\path [line] (11) -- node [yshift=1em, pos=.5]{$r_3\neq0$}(2);
+	\path [line] (22) -- node [yshift=1em, pos=.5]{$r_3=0$}(3);
+	\path [line] (22) -- node [yshift=1em, pos=.5]{$r_3\neq0$}(4);
+	\path [line] (33) -- node [yshift=1em, pos=.5]{$r_3=0$}(5);
+	\path [line] (33) -- node [yshift=1em, pos=.5]{$r_3\neq0$}(6);
+	\path [line] (44) -- node [yshift=1em, pos=.5]{$r_3=0$}(7);
+	\path [line] (44) -- node [yshift=1em, pos=.5]{$r_3\neq0$}(8);
+
+	\path [line] (1111) -- node [yshift=1em, pos=.5]{$r_2=0$}(11);
+	\path [line] (1111) -- node [yshift=1em, pos=.5]{$r_2\neq0$}(22);
+	\path [line] (2222) -- node [yshift=1em, pos=.5]{$r_2=0$}(33);
+	\path [line] (2222) -- node[yshift=1em, pos=.5]{$r_2\neq0$}(44);
+
+	\path [line] (start) -- node [yshift=1em, pos=.5]{$r_1=0$}(1111);
+	\path [line] (start) -- node[yshift=1em, pos=.5]{$r_1\neq0$}(2222);
+
+\end{tikzpicture}
+
+
+
+\end{document}
