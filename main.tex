@@ -12,7 +12,7 @@
 
 \subtitle{Systems Biology}
 
-\title[$L_1$ regularization to detect differences between cell types]{{\boldm $L_1$} regularization facilitates detection of cell type specific parameters in dynamical systems}
+\title[$L_1$ regularization to detect differences between cell types]{{\boldm $L_1$} regularization facilitates detection of cell type-specific parameters in dynamical systems}
 \author[Steiert \textit{et~al}.]{Bernhard Steiert\,$^{\text{\sfb 1,}*}$, Jens Timmer\,$^{\text{\sfb 1,2,3}}$ and Clemens Kreutz\,$^{\text{\sfb 1,3}}$}
 \address{$^{\text{\sf 1}}$Institute of Physics, University of Freiburg, Germany, \\
 $^{\text{\sf 2}}$BIOSS Centre for Biological Signalling Studies, University of Freiburg, Germany, and \\
@@ -28,11 +28,11 @@ $^{\text{\sf 3}}$Freiburg Center for Systems Biology (ZBSA), University of Freib
 A major goal of drug development is to selectively target certain cell types.
 Cellular decisions influenced by drugs are often dependent on the dynamic processing of information.
 Selective responses can be achieved by differences between the involved cell types at levels of receptor, signaling, gene regulation, or further downstream.
-Therefore, a systematic approach to detect and quantify cell type specific parameters in dynamical systems becomes necessary.\\
+Therefore, a systematic approach to detect and quantify cell type-specific parameters in dynamical systems becomes necessary.\\
 \textbf{Results:}
-Here, we demonstrate that a combination of non-linear modeling with $L_1$ regularization is capable of detecting cell-type specific parameters.
+Here, we demonstrate that a combination of non-linear modeling with $L_1$ regularization is capable of detecting cell type-specific parameters.
 To adapt the least-squares numerical optimization routine to $L_1$ regularization, sub-gradient strategies as well as truncation of proposed optimization steps were implemented.
-Likelihood-ratio tests are used to determine the optimal penalization strength resulting in a sparse solution in terms of a minimal number of cell-type specific parameters that is in agreement with the data.
+Likelihood-ratio tests are used to determine the optimal penalization strength resulting in a sparse solution in terms of a minimal number of cell type-specific parameters that is in agreement with the data.
 The uniqueness of the solution is investigated using the profile likelihood.
 By applying our implementation to a realistic dynamical benchmark model of the \emph{DREAM6} challenge we were able to recover parameter differences with an accuracy of 78\%.
 % 74\% true positives of the differences with 20\% false positives.
@@ -90,21 +90,21 @@ For such ODE models, the selection issue occurs when several cell types are cons
 Since each cell type has different concentrations of intracellular compounds and diverse structure, each parameter of a reaction network could potentially be different. 
 We suggest $L_1$-regularization in this setting to predict parameters differences between cell types.
 All components of mechanistic models have counterparts in the biological pathway of interest. 
-Therefore, the models usually contain a large number of state variables representing molecular compounds and many parameters for the individual biochemical interactions. 
+% Therefore, the models usually contain a large number of state variables representing molecular compounds and many parameters for the individual biochemical interactions. 
 Therefore, the models are large and the effect of the parameters on the dynamics is typically strongly nonlinear. 
 For estimating parameters in such ODE models, only a small subset of optimization routines in combination with appropriate strategies for calculating derivatives of the objective function, dealing with non-identifiability, handling of local minima etc. are applicable \citep{Raue2013}. 
 We therefore augment an existing and well-tested implementation for parameter estimation for such systems \citep{Raue2015} to perform selection of cell type-specific parameters based on $L_1$-regularization. 
 For this purpose, trust-region optimization \citep{Coleman96} was combined with a suitable strategy for non-linear models as presented in \citep{Schmidt09} to enable efficient optimization in the presence of $L_1$-penalties.
 
-Since shrinkage, i.e. decreasing the variance by introducing a bias is not intended for mechanistic models, we only use $L_1$-regularization for selection, i.e. determining the cell-type specific parameters, and then use these additional parameters to estimate the magnitude of all parameters in an unbiased manner in a second step. 
+Since shrinkage, i.e. decreasing the variance by introducing a bias is not intended for mechanistic models, we only use $L_1$-regularization for selection, i.e. determining the cell type-specific parameters, and then use the resulting \emph{parsimonious model} to estimate the magnitude of all parameters in an unbiased manner in a second step. 
 An appropriate strategy is presented for choosing the regularization strength in this setting. 
 The applicability is demonstrated using a benchmark model from the \emph{DREAM (Dialogue for Reverse Engineering Assessment and Methods)} parameter estimation challenge \citep{Meyer2014}. 
-The presented approach constitutes a suitable methodology for predicting cell-type specific parameters.
-These could be used to predict cell-type specific sensitivities for drugs, which is a prominent challenge in cancer research.
+The presented approach constitutes a suitable methodology for predicting cell type-specific parameters.
+These could be used to predict cell type-specific sensitivities for drugs, which is a prominent challenge in cancer research.
 
 \begin{figure}[!tpb]%figure1
 \centerline{\includegraphics[width=.4\textwidth]{Figures/tree.eps}}
-\caption{Na\"{\i}ve approach to select cell type specific parameters. Each log fold-change $r_i$ of parameter $p_i$ between cell types could be either cell type-independent ($r_i=0$) or -specific ($r_i\neq 0$). Hence, the number of model candidates (circles) with grows exponentially with the number of potential cell type specific parameters (x-axis).}\label{fig:01}
+\caption{Na\"{\i}ve approach to select cell type-specific parameters. Each log fold-change $r_i$ of parameter $p_i$ between cell types could be either cell type-independent ($r_i=0$) or -specific ($r_i\neq 0$). Hence, the number of model candidates (circles) with grows exponentially with the number of potential cell type-specific parameters (x-axis).}\label{fig:01}
 \end{figure}
 
 \section{Problem statement}
@@ -130,7 +130,7 @@ Given data from two cell types that can be described by a common ODE structure (
 The parameters $p$ are then in general specific for each cell type (ct), i.e. $p_\text{ct1} \neq p_\text{ct2}$.
 However, some of the components in $p_\text{ct1}$ and $p_\text{ct2}$ may be independent from the cell type.
 Discovering which of the components in $p_\text{ct1}$ and $p_\text{ct2}$ are most likely to be cell type-specific is the main topic of this manuscript.
-A na\"{\i}ve approach would be to simply test all possibilities for cell type-specific parameters.
+A na\"{\i}ve approach is to simply test all possibilities for cell type-specific parameters.
 However, as depicted in Figure~1\vphantom{\ref{fig:01}} the number of model candidates grows exponentially with the number of parameters, rendering such an approach as infeasible.
 
 \subsection{Unbiased parameter estimation}
@@ -144,9 +144,9 @@ is optimized, resulting in the maximum likelihood estimate
 % \hat p = \text{arg}\min \left[ -2\log \mathcal L(p) \right] \:.
 \hat p = \text{arg}\min \left[ \chi^2(p) \right] \:.
 \end{equation}
-Multi-start deterministic local optimization is an established approach to ensure that $\hat p$ is in fact the global optimum, as presented in \citep{Raue2013}.
 In general, the ODE system cannot be solved analytically.
 Therefore, numerical methods as implemented in Data2Dynamics \citep{Raue2015} are employed for calculating ODE solutions and performing maximum likelihood estimation.
+Multi-start deterministic local optimization is an established approach to ensure that $\hat p$ is in fact the global optimum, as presented in \citep{Raue2013}.
 
 \subsection{Regularization}
 Regularization constitutes a prominent method to incorporate prior knowledge or to improve numerics of parameter estimation.
@@ -176,10 +176,10 @@ Therefore, $L_1$ is the natural choice for parameter selection and is used in th
 % Due to local optima, the MLE (Eq.~\ref{eq:lik}) is obtained for individual cell types.
 
 Figure~2\vphantom{\ref{fig:02}} demonstrates how sparsity is induced by the $L_1$-norm.
-In the upper row, the data contribution ($\chi^2$) is depicted by the solid black line, representing an arbitrary linear model.
+In the upper row, the data contribution ($\chi^2$) is depicted by the solid black line, representing a hypothetical linear model.
 The $L_1$ contribution is shown by the dashed blue lines.
 With increasing $\lambda$ from panels left to right, the influence of the $L_1$ term is increased.
-The lower row shows the penalized likelihood (Eq.~\ref{eq:likreg}), i.e. the sum of the two lines in the corresponding upper panels.
+The lower row shows the penalized likelihood (Eq.~\ref{eq:likreg}) for $k=1$, i.e. the sum of the two lines in the corresponding upper panels.
 For $\lambda=0.5$, the minimum is shifted towards zero (middle panel) in contrast to the unregularized minimum (left panel) but still different from zero.
 In contrast, the minimum is exactly at zero for $\lambda=2$ (right panel).
 
@@ -228,14 +228,14 @@ In this case, the convergence criterion
 	\begin{cases}
 	\nabla_{p_i} \chi^2 = 0, \:\:& \text{ }\forall i\\
 	\nabla_{r_i} \chi^2 + \lambda \text{ sign}(\hat r_i) = 0, \:\:& \text{ for } |\hat r_i| > 0\\
-	|\nabla_{r_i} \chi^2| \le \lambda, \:\:& \text{ for } \hat r_i = 0 \:.
+	|\nabla_{r_i} \chi^2| \le \lambda, \:\:& \text{ for } \hat r_i = 0
 	\end{cases}
 	\label{eq:convcrit}
 \end{align}
-is implemented by setting
+is implemented for $r_i=0$ by setting
 \begin{equation}
 	\begin{cases}
-	\text{sres}_{ii}=0& \text{ for } |\nabla_i \chi^2(r_i)| > \lambda\\
+	\text{sres}_{ii}=0,& \text{ for } |\nabla_i \chi^2(r_i)| > \lambda\\
 	\text{sres}_{ij}=0\:\:\forall j, \:\:& \text{ for } |\nabla_i \chi^2(r_i)| \le \lambda \:.
 	\end{cases}
 	\label{eq:sresset}
@@ -262,11 +262,11 @@ Both convergence and truncation are depicted in Figure~3\vphantom{\ref{fig:03}}.
 
 \begin{figure}[!tpb]%figure1
 \centerline{\includegraphics[width=235pt]{Figures/l1_cartoon.pdf}}
-\caption{Convergence criterion and truncation for an optimum of $\chi^2_{L_1}$ at zero. Left panel: the implementation considers a $L_1$ regularized parameter $r_i=0$ to be converged if the gradient from the data ($\chi^2$ - black line) is smaller than the slope of the $L_1$ term (dashed blue line). For $r_i=0$, the algorithm compares the red line, which is the slope of the black line at this point, to the blue dashed line. In this example, the slope of the $L_1$ term is larger than of the $\chi^2$ term, hence the minimum is at zero and the corresponding entries in the sensitivity matrix are set to zero. Right panel: The black arrows from top to bottom give a cartoonish representation of optimization steps. To avoid jumping back and forth (black arrows), i.e. numerical instability by changing the sign of $r_i$ due to discontinuously changing slope of $L_1$, optimization steps have to be truncated to the boundary of the orthant as indicated by the red arrow.}\label{fig:03}
+\caption{Convergence criterion and truncation for an optimum of $\chi^2_{L_1}$ at zero. Left panel: the implementation considers a $L_1$ regularized parameter $r_i=0$ to be converged if the gradient from the data ($\chi^2$ - black line) is smaller than the slope of the $L_1$ term (dashed blue line). For $r_i=0$, the algorithm compares the red line, which is the slope of the black line at this point, to the blue dashed line. In this example, the slope of the $L_1$ term is larger than of the $\chi^2$ term, hence the minimum is at zero and the corresponding entries in the sensitivity matrix are set to zero. Right panel: The black arrows from top to bottom give a cartoonish representation of optimization steps. To avoid jumping back and forth (black arrows), i.e. numerical instability by changing the sign of $r_i$ due to discontinuously changing slope of $L_1$, optimization steps are truncated to the boundary of the orthant as indicated by the red arrow.}\label{fig:03}
 \end{figure}
 
 \subsection{Regularization strength $\lambda$}
-To choose the optimal value $\lambda^*$ of the regularization strength, $\lambda$ is increased from 0 and the likelihood is re-optimized until mismatch between model and data is too large to reject the associated simplification.
+To choose the optimal value $\lambda^*$ of the regularization strength, $\lambda$ is increased from 0 and the un-regularized likelihood is re-optimized until mismatch between model and data is too large to not reject the associated simplification.
 % This strategy is similar to the calculation of \emph{PL}, where a parameter of interest is fixed and the remaining parameters are re-estimated.
 Thus, likelihood-ratio statistics are employed to discover admissible values.
 For $L_1$ based parameter selection, cross validation has been suggested to choose the final value for the regularization weight $\lambda$.
@@ -274,8 +274,9 @@ However, for nonlinear models, leaving data out could produce non-identifiablili
 Therefore, we decided to use an information theory based test criterion.
 The most prominent methods are the likelihood ratio test (LRT), the Akaike information criterion (AIC), and the Bayesian information criterion (BIC).
 % The criteria are depicted by the vertical lines in Figure~4\vphantom{\ref{fig:04}} for an exemplary regularization path.
-In certain settings these are equivalent: AIC resembles LRT for $\alpha = 15.6\%$ and $1$ degree of freedom.
-AIC is known to select systematically too large models and is thus not a consistent model selection criterion.
+In certain settings these are equivalent:
+AIC resembles LRT for fixed $\alpha = 15.6\%$ and $1$ degree of freedom.
+Further, AIC is known to select systematically too large models and is thus not a consistent model selection criterion.
 % With growing model size, $\alpha$ should be adjusted.
 % As this is not the case for AIC, we favor LRT over AIC.
 BIC considers the number of data points and is a consistent model seletion criterion.
@@ -303,11 +304,11 @@ We use the significance level $\alpha = 0.05$ in the following.
 \subsection{Profile likelihood}
 The \emph{profile likelihood (PL)} constitutes a method to calculate confidence intervals (CI) of parameters or predictions, see \cite{Raue2009} and \cite{Kreutz2012} for an overview.
 It only requires weak assumptions and therefore performs well even for strongly non-linear problems where asymptotic methods based on the Fisher Information matrix fail.
-The basic idea is to fix a certain model quantity of interest, e.g. a parameter, re-optimize all remaining parameters. % Formula?
+The basic idea is to fix a certain model quantity of interest, e.g. a parameter, and re-optimize all remaining parameters. % Formula?
 This re-optimization procedure is iterated for different fixed values of the quantity of interest.
-By comparing the increase in $\chi^2$ to the maximum likelihood estimate the CI is calculated.
+By comparing the increase in $\chi^2$ with respect to the maximum likelihood the CI is calculated.
 
-Here, we use the \emph{PL} to check the parameter differences discovered by our algorithm.
+Here, we use the \emph{PL} to check the parameter differences discovered by our $L_1$ based implementation.
 Thus, the un-regularized \emph{PL} of a fold-change parameter $r_i$ that has been proposed using $L_1$ regularization is calculated.
 If selection was successful, the \emph{PL} should not be compatible with 0.
 This interpretation is equivalent to a likelihood ratio test between the null model $r_i=0$ and the alternative model $r_i \neq 0$.
@@ -316,10 +317,10 @@ Note that we did not use \emph{PL} in the first place, as the combinatorial issu
 
 In addition, the \emph{PL} can be used to investigate the uniqueness of the solution.
 In a non-unique setting there are multiple alternatives to select parameter differences.
-For instance, a selected cell type specific parameter could be exchanged with another parameter that was not selected as different.
+For instance, a selected cell type-specific parameter could be exchanged with another parameter that was not selected as different.
 For testing uniqueness, the \emph{PL} for each $r_i$ with estimate $\hat r_i=0$ is calculated.
-This is equivalent to testing a model with one additional parameter ($r_i$) in comparison to parsimonious model ($r_i \equiv 0$).
-If inside the CI of $r_i$, another parameter that was different to $0$ is now compatible with $0$, one cannot decide based on the given data which one is different.
+This is equivalent to testing a model with one additional parameter ($r_i$) in comparison to the \emph{parsimonious model} ($r_i \equiv 0$).
+If inside the CI of $r_i$, another parameter that was different to zero is now compatible with zero, one cannot decide based on the given data which one is different.
 
 %Finally, regularized \emph{PL} of selected differences can pinpoint compensating effects.
 %Compensation manifests in piecewise flat regions in \emph{PL} though the regularization alone should already induce non-zero derivatives of \emph{PL}.
@@ -328,19 +329,19 @@ If inside the CI of $r_i$, another parameter that was different to $0$ is now co
 
 \begin{methods}
 \section{Approach}
-The approach presented in this manuscript extends the available modeling environment Data2Dynamics \citep{Raue2015} by $L_1$ regularization.
-Data2Dynamics has been used in a variety of applications \citep{Becker1404,Bachmann516,Beer2014} to perform parameter estimation, uncertainty analysis, and experimental design of nonlinear coupled partially observed ODE systems.
-In the following, we summarize the $L_1$ specific additions required in our approach to discover cell type specific parameters.
+The approach presented in this manuscript extends the available methodology implemented in the modeling environment Data2Dynamics \citep{Raue2015} by $L_1$ regularization.
+Data2Dynamics has been used in a variety of applications \citep{Becker1404,Bachmann516,Beer2014} to perform parameter estimation, uncertainty analysis, and experimental design of nonlinear stiff partially observed ODE systems.
+In the following, we summarize the $L_1$ specific enhancements in addition to the established modeling routine as implemented in our approach for discovering cell type-specific parameters.
 
 Given an overarching model that is able to describe two cell types with two independent parameter vectors $p_\text{ct1}$ and $p_\text{ct2}$ for cell types 1 and 2, respectively.
 Fold-changes $r_i$ are calculated to express the parameters of cell type 2 relative to cell type 1, i.e. $p_{i,\text{ct2}} = \tilde r_i \cdot p_{i,\text{ct1}}$.
 Eq.~\ref{eq:likl1} is used to $L_1$ penalize deviations of the fold-change parameter vector $r$ to zero.
 In contrast to many other \emph{LASSO}-like techniques, our method consists of two consecutive steps:
 \begin{enumerate}
-\item Determine cell type specific parameters using the regularized $\chi^2_{L_1}$
-\item Determine the parsimonious model and parameter estimates using the un-regularized $\chi^2$
+\item Using the regularized $\chi^2_{L_1}$ to determine cell type-specific parameters 
+\item Using the un-regularized $\chi^2$ to determine the \emph{parsimonious} model and parameter estimates 
 \end{enumerate}
-For the first step, $\lambda$ is scanned and the cell type specific parameters are determined for each value of $\lambda$.
+For the first step, $\lambda$ is scanned and the cell type-specific parameters are determined for each value of $\lambda$.
 Then, at the second step, for choosing the optimal $\lambda^*$ the un-regularized Eq.~\ref{eq:lik} is optimized, under the constraint that parameters with $r_i = 0$ are shared between both cell types.
 The full model with all parameters specific for each cell type is compared by the likelihood ratio test to each of the models that were selected using $L_1$ regularization.
 Thereby, the \emph{parsimonious model} is defined as the minimal unbiased model that cannot be rejected by the likelihood ratio test.
@@ -349,10 +350,10 @@ To cope with diverging terms in the Hessian matrix, we implemented a heuristic t
 If the likelihood did not increase by more than one, the correction was accepted.
 Potential improvements to such a strategy are provided in the discussion.
 
-Alternatively, the \emph{PL} can be utilized to further reduce the number of cell type specific parameters, which we illustrate exemplarily.
+Alternatively, the \emph{PL} can be utilized to further reduce the number of cell type-specific parameters, which we illustrate exemplarily.
 In addition, we show investigation of uniqueness using the \emph{PL}.
-However, it is not feasible to perform these for each of the $N=500$ runs, because calculation of the \emph{PL} is computationally demanding.
-When applied in practice, results can be further improved by such analyses pointing out even smaller and biologically more plausible solutions.
+However, it is not feasible to perform these calculations for each of the $N=500$ runs, because obtaining such a large number of \emph{PL} is computationally not feasible for the given model size.
+When applied in practice, results can be further improved by the presented analyses pointing out even smaller and biologically more plausible solutions.
 
 % Further, plotting unobserved components for both cell types enables validation design by discovering dynamics with a small prediction CI, which are different between the cell types.
 
@@ -450,10 +451,10 @@ Thus, we conclude that determining parameter differences between cell types is p
 Next, we assumed 1/3 of all parameters to be cell type-specific.
 We therefore randomly simulated fold-changes of $[1/10~1/5~1/2~2~5~10]$ for non-Hill parameters.
 For Hill coefficients, fold changes of $[1/4~1/2~2~4]$ were assumed such that Hill coefficients are within the interval $[1,4]$ for both cell types.
-Assuming this range is motivated biologically as the number of binding sites on a molecule is thereby considered.
+This range is motivated biologically as thereby the number of binding sites on a molecule is considered.
 Taken together, the number of possible models is $2^{29}$, i.e. more than $10^8$.
 
-We chose the following two observation types from the original DREAM6 challenge setup:
+We chose the following two observation types from the original \emph{DREAM6} challenge setup:
 (1) mRNA measurements for all mRNAs with 21 data-points each, and (2) protein measurements for 2 selected proteins, each with 41 data-points.
 The observation function is the identity, i.e. the molecular compounds are observed directly without scaling or offset parameters.
 The error model contains an absolute term as well as a relative term with fixed weighting.
@@ -468,13 +469,13 @@ In total, this results in 18 possible experimental conditions.
 To have a reference for perturbations wildtype data, i.e. mRNA and protein data for all observables, was included for parameter estimation.
 Within the challenge, an identifiable setting has been achieved using 9 additional data sets out of 331 possibilities.
 To allow variability in the number of experiments, we randomly (50\%) selected for each of the 18 conditions whether it was observed or not.
-To mimic the partial observation which was one task of the DREAM6 challenge, we chose randomly whether mRNA (1/3) or proteins (2/3) were observed.
+To mimic the partial observation which was one task of the \emph{DREAM6} challenge, we chose randomly whether mRNA (1/3) or proteins (2/3) were observed.
 Given the latter, 2 out of 6 proteins were randomly selected.
 We chose the same experimental conditions and observables for both cell types.
 
 After implementing the fold-changes between cell types, as well as perturbations and observations we used a $L_1$ regularization for all fold-change parameters and scanned along $\lambda$ for parameter selection.
 To chose the optimal regularization strength $\lambda^*$ we used the un-regularized $\chi^2$.
-Thus, we could select the parsimonious model and ensure unbiased estimates of the fold-change parameters.
+Thus, we could select the \emph{parsimonious model} and ensure unbiased estimates of the fold-change parameters.
 
 \begin{figure}[!tpb]%figure1
 \centerline{\includegraphics[width=235pt]{Figures/ROC.pdf}}
@@ -485,9 +486,9 @@ Thus, we could select the parsimonious model and ensure unbiased estimates of th
 The procedure of selecting fold-changes and observations was repeated $N=500$ times. % , yielding a random sample of $2^{29} \cdot 331 > 10^{11}$ possibilities.
 Afterwards, the presented algorithm for $L_1$ regularized parameter selection was applied in an unsupervised manner.
 The performance is summarized in Figure~4\vphantom{\ref{fig:04}}.
-For each run, a receptor operator curve (ROC) is calculated by scanning $\lambda$ from $10^{-4}$ to $10^6$.
+For each run, a receptor operating characteristic (ROC) curve is calculated by scanning $\lambda$ from $10^{-4}$ to $10^6$.
 The black line depicts the arithmetic mean ROC curve and the shading the standard deviation over all $N=500$ repetitions.
-The blue dots show the parsimonious model selected by the likelihood-ratio test.
+The blue dots show the \emph{parsimonious model} selected by the likelihood-ratio test.
 Usually, for a given ROC curve the selection criterion is chosen to maximize both sensitivity and specificity simultaneously, which is the point most up-left on the ROC curve.
 Because the blue dots appear centered around this `kink', we consider the selection criterion appropriate.
 On average, the implementation results in a 74\% true positive rate (TPR) and a 20\% false positive rate (FPR) for the given setting.
@@ -519,7 +520,7 @@ Ribosomal strength & 3000 & 986 & 0.1927 & 0.7982 & 0.8043\\
 $K_D$ value & 4000 & 1365 & 0.1624 & 0.6989 & 0.7903\\
 Hill coefficient & 4000 & 1311 & 0.1852 & 0.6461 & 0.7595\\\hline
 All & 14500 & 4875 & 0.2006 & 0.7366 & 0.7783\\\botrule
-\end{tabular}}{On average, 1/3 of the parameters that could potentially be cell type-specific ($N_\text{test}$) were drawn to actually be cell-type specific ($N_\text{mod}$). Overall, parameter differences are detected with 78\% accuracy. The model containts a shared degradation rate for all proteins, which is often diagnosed as different. Protein production and ribosomal strengths are on average for FPR and TPR. $K_D$ and Hill coefficients are difficult to detect because concentration range around $K_D$ has to be covered to see effect on dynamics. 500 repetitions were computed. Each run ($L_1$ regularized scan and subsequent unregularized scan to identify parsimonious model) took 28.8 min on average on an Intel Xeon E5-1620 3.60Ghz desktop computer.}
+\end{tabular}}{On average, 1/3 of the parameters that could potentially be cell type-specific ($N_\text{test}$) were drawn to actually be cell type-specific ($N_\text{mod}$). Overall, parameter differences are detected with 78\% accuracy. The model containts a shared degradation rate for all proteins, which is often diagnosed as different. Protein production and ribosomal strengths are on average for FPR and TPR. $K_D$ and Hill coefficients are difficult to detect because concentration range around $K_D$ has to be covered to see effect on dynamics. 500 repetitions were computed. Each run ($L_1$ regularized scan and subsequent unregularized scan to identify \emph{parsimonious model}) took 28.8 min on average on an Intel Xeon E5-1620 3.60Ghz desktop computer.}
 \end{table}
 
 \subsection{Supervised examination} % Hier noch klarer machen, was genau gemacht werden soll.
@@ -531,7 +532,7 @@ With increasing $\lambda$, fold-change parameters are shrinked towards zero, and
 Thus, the number of cell type-specific parameters decreases for larger $\lambda$.
 The dependency of the likelihood ratio, i.e. the decrease of the unregularized $\chi_\lambda^2$ compared to the full model with only cell type-specific parameters, is shown by the blue line in the right panel of Figure~5\vphantom{\ref{fig:05}}.
 The statistical threshold $\chi^2_{m_\lambda,0.05}$ is depicted by the dashed red line.
-The regularization strength $\lambda^*$ at which both lines cross marks the parsimonious model that has minimal complexity but cannot be statistically rejected.
+The regularization strength $\lambda^*$ at which both lines cross marks the \emph{parsimonious model} that has minimal complexity but cannot be statistically rejected.
 
 % Next, we calculate \emph{PL} for each regularized parameter to check for compensating effects.
 We checked by calculating \emph{PL} of the unregularized fold-change parameters whether the results are not compatible with zero (Figure~6\vphantom{\ref{fig:06}}).
@@ -554,17 +555,17 @@ For the \emph{PL} and CI shown in the upper left panel, the re-optimized paramet
 This corresponds to the first scenario.
 In contrast, as depicted in the right panels, another fold-change parameter $r_i$ (here: $r\_\text{Hill}8$) may be compatible with zero (circle) if the parameter shown on the x-axis ($r\_{pro4}$) is allowed to deviate from zero.
 This corresponds to the second scenario.
-Therefore, based on the data, it is not possible to decide which of the parameters is cell type-specific and which one is independent from cell type.
+Therefore, based on the data, it is not possible to decide which of these two parameters is in fact cell type-specific and which one is independent from cell type.
 Interestingly, the underlying truth ($r\_\text{Hill}8=0$ and $r\_{pro4}\neq0$) is contrary to the originally selected difference ($r\_\text{Hill}8\neq0$ and $r\_{pro4}=0$).
-Thus, \emph{PL} does not provide which solution is correct but gives candidates which could be exchanged.
-Using these, experiments could be designed to obtain eventually an unique solution.
+Thus, \emph{PL} does not provide which solution is correct but generates alternative hypotheses that cannot be statistically rejected.
+Using these, experiments could be designed as described in \cite{Steiert12} to eventually obtain an unique solution.
 
-Due to the presented benefits, we advise a supervised examination of the results in a real world application to maximize the performance of the method.
+Due to the presented benefits and additional insights, we advise a supervised examination of the results in a real world application to maximize the performance of the method.
 
 \begin{figure}[!tpb]%figure1
 \centerline{\includegraphics[width=110pt]{Figures/l1_tree.pdf}~~\includegraphics[width=110pt]{Figures/l1_selection.pdf}}
 %\centerline{\includegraphics{fig01.eps}}
-\caption{Left: Regularization path of a representative setup. On the x-axis, the regularization weight $\lambda$ is depicted. As $\lambda$ is increased, the number fold-changes unequal to zero is reduced and the estimates are shrinked towards zero. The labels are not exhaustive. As expected for non-linear models, the individual paths are not necessarily monotonous. The vertical dashed lines depicts the parsimonious model. Right: Selection of $\lambda$. The likelihood-ratio test statistic $D$ is calculated for each value of $\lambda$ (blue solid line). The value where $D$ crosses the statistical threshold $\chi^2_{m_\lambda,0.05}$ (dashed red line) marks the most parsimonious model (dashed black line). To enable plotting in log-space, one is added to all quantities.}\label{fig:05}
+\caption{Left: Regularization path of a representative setup. On the x-axis, the regularization weight $\lambda$ is depicted. As $\lambda$ is increased, the number fold-changes unequal to zero is reduced and the estimates are shrinked towards zero. The labels are not exhaustive. As expected for non-linear models, the individual paths are not necessarily monotonous. The vertical dashed lines depicts the \emph{parsimonious} model. Right: Selection of $\lambda$. The likelihood-ratio test statistic $D$ is calculated for each value of $\lambda$ (blue solid line). The value where $D$ crosses the statistical threshold $\chi^2_{m_\lambda,0.05}$ (dashed red line) marks the \emph{parsimonious model} (dashed black line). To enable plotting in log-space, one is added to all quantities.}\label{fig:05}
 \end{figure}
 
 \begin{figure}[!tpb]%figure1
@@ -574,7 +575,7 @@ Due to the presented benefits, we advise a supervised examination of the results
 
 \begin{figure}[!tpb]%figure1
 \centerline{\includegraphics[width=110pt]{Figures/uniqueness_1.pdf}~~\includegraphics[width=110pt]{Figures/uniqueness.pdf}}
-\caption{Uniqueness and exchangeability. To check the uniqueness of a solution we used the \emph{PL} whether ($r_i=0$ and $r_j\neq0$) gives an equivalent results as ($r_i\neq0$ and $r_j=0$) for $i\neq j$. The results of the supervised examination example are shown. In the upper row, \emph{PL} of a fold-change parameter that was estimated to zero is shown. The optimum (asterisk) is not at the minimum because the unbiased solution is computed. On the lower row, the respective values of the other $\{r_i\}$ are shown. When a parameter that was non-zero is compatible with zero, it is marked with a circle. On the left hand side the fold-change parameter of $K_{D,1}$, which is a true negative, cannot be exchanged with any other parameter. However, on the right hand side, a false negative fold-change $r_{pro4}$ could be exchanged with the false positive Hill coefficient $r_{H8}$. Thus although the solution classifies both parameters incorrectly, it pinpoints the possibility of the correct solution. Given the available data, these cannot be distinguished and experimental design would be necessary to decide which one is cell type specific, or both.}\label{fig:07}
+\caption{Uniqueness and exchangeability. To check the uniqueness of a solution we used the \emph{PL} whether ($r_i=0$ and $r_j\neq0$) gives an equivalent results as ($r_i\neq0$ and $r_j=0$) for $i\neq j$. The results of the supervised examination example are shown. In the upper row, \emph{PL} of a fold-change parameter that was estimated to zero is shown. The optimum (asterisk) is not at the minimum because the unbiased solution is computed. On the lower row, the respective values of the other $\{r_i\}$ are shown. When a parameter that was non-zero is compatible with zero, it is marked with a circle. On the left hand side the fold-change parameter of $K_{D,1}$, which is a true negative, cannot be exchanged with any other parameter. However, on the right hand side, a false negative fold-change $r_{pro4}$ could be exchanged with the false positive Hill coefficient $r_{H8}$. Thus although the solution classifies both parameters incorrectly, it pinpoints the possibility of the correct solution. Given the available data, these cannot be distinguished and experimental design would be necessary to decide which one is cell type-specific, or both.}\label{fig:07}
 \end{figure}
 
 
@@ -615,13 +616,13 @@ Due to the presented benefits, we advise a supervised examination of the results
 
 \section{Discussion}
 % Differences to linear setting
-In this manuscript, we used $L_1$ regularization to predict cell type specific parameters in systems of coupled partially observed ODEs.
+In this manuscript, we used $L_1$ regularization to predict cell type-specific parameters in systems of coupled partially observed ODEs.
 Compared to the classical \emph{LASSO} which was designed for linear models, many pitfalls emerge for parameter estimation in non-linear ODE systems.
 Therefore, we augmented an available implementation by $L_1$ peculiarities
 and thereby focused on optimization routines that can efficiently handle non-linearity.
-Although, the presented methodolgy may be improved in terms of numerical performance by concepts presented in the vast amount of literature on extending \emph{LASSO}, 
+Although, we cannot exclude that the presented methodolgy may be improved in terms of numerical performance by concepts presented in the vast amount of literature on extending \emph{LASSO}, 
 we could implement a robust and numerically stable algorithm.
-In our example, cell-type specific parameters were reliably predicted for 500 different data setups.
+In our example, cell type-specific parameters were reliably predicted for 500 different data setups.
 
 Because model predictions non-linearly depend on parameters, 
 the regularization paths depicting the dependency of the cell specific parameters on the regularization strength 
@@ -654,8 +655,8 @@ In this case, $r_i$ appears in the denominator. Therefore, as $r_i$ approaches z
 	\lim_{r_i \rightarrow 0} H_{ij} = \lim_{r_j \rightarrow 0} H_{ij} = \pm \infty
 \end{equation}
 diverges.
-For large entries in the Hessian, the optimizer decreases the step size and therefore stuck before approaching zero.
-This increases the FPR since parameters compatible with zero shrink but may not be able to actually reach zero.
+For large entries in the Hessian, the optimizer decreases the step size and therefore may get stuck when approaching zero.
+Thereby, the FPR is increased since parameters compatible with zero shrink but may not be able to actually reach zero.
 We conclude that the FPR could be further improved if such numerical issues are completely solved. %numerics are the major source of FPR in our implementation.
 To overcome these limitations, norms with $k>1$ could be employed.
 Although in the proximity of zero $L_1$ dominates the Hessian, an additional $L_2$ term like in the \emph{elastic net} could provide enough directional information to come closer to zero.
@@ -677,11 +678,10 @@ The latter originates from the complex grouping structure of measurements given 
 % L2 with analysis of shape
 
 %DREAM specific discussion
-We chose a benchmark model from the DREAM6 parameter estimation challenge 
+We chose a benchmark model from the \emph{DREAM6} parameter estimation challenge 
 to demonstrate applicability of our implementation because it provides a variety of predefined realistic experimental setups.
 For assessing the performance, cell type dependencies of parameters were introduced and then recovered in an unsupervised manner.
-
-Compared to typical pathway models, the DREAM6 setting exhibits two major simplifications.
+Compared to typical pathway models, the \emph{DREAM6} setting exhibits two major simplifications.
 First, the components of the reaction network are directly observed, i.e.~there are no scaling parameters.
 Second, the initial concentrations were assumed as known.
 However, we do not expect issues if both simplifications are relaxed because the unregularized parameter estimation implementation is well-tested for such cases.
@@ -691,9 +691,9 @@ A non-identifiable parameter can be associated with a flat \emph{PL}, i.e. the e
 If the range of a fold-change parameter is compatible with zero, the $L_1$ regularization will force the estimate to zero.
 Hence, the presence of non-identifiabilites may decrease the TPR.
 One example for such a behavior are Hill kinetics, i.e. Hill coefficients and $K_D$ values, which also appeared as most difficult to detect.
-We conclude that identifiability is a major source for suboptimal TPR.
+We conclude that identifiability is limiting the TPR in this setting.
 %Experimental design principles were not applied, which were the task in the original DREAM6 challenge.
-%Therefore, one cannot expect perfect detection of cell type specific parameters due to identifiability issues.
+%Therefore, one cannot expect perfect detection of cell type-specific parameters due to identifiability issues.
 Since the subset of available data sets was randomly drawn from the predefined set of experiments,
 it is not expected that all subsets contain comprehensive information for estimating all parameters.
 Therefore, identifiability issues naturally occur and appear as false negatives in the parameter selection step.
@@ -701,7 +701,8 @@ In general, the magnitude of both, correct and incorrect predictions depend on t
 
 It has to be stated that cell type differences are detected only if there is evidence in the data.
 Therefore, unobserved components and specific, incomplete measurement conditions increase the chance of missing biologically relevant cell-specific characteristics.
-Hence, the final model should always be checked for biological completeness and plausiblity.
+However, we could show that the unbiased estimates of true positive fold-changes are robust to missclassification of others.
+Nevertheless, the final model should always be checked for biological completeness and plausiblity.
 
 In summary, we proposed to use $L_1$ regularization in combination with nonlinear models based on \emph{ordinary differential equation} systems.
 Theoretical considerations were given and the approach was tested for random designs of a \emph{DREAM} benchmark model.
